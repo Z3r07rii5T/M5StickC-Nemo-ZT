@@ -4,7 +4,7 @@ This is not the official NEMO Version, please for official version follow the te
 It is an experiment for learning and implementation, compile and update it under your own risk.
 NEMO by Z3r07rii5T is an ALPHA implementation for studying and learning purposes only.
 
-* Here follow the Official M5Stick-NEMO description
+* Here follow the Official M5Stick-NEMO description (https://github.com/n0xa/m5stick-nemo) | IG: @4x0nn
 * Firmware for high-tech pranks on M5Stack ESP32 Devices
 
 ## Name and Background
