@@ -217,7 +217,7 @@ QRCODE qrcodes[] = {
 
 bool isSwitching = true;
 #if defined(RTC)
-  int current_proc = 0; // Start in Clock Mode
+  int current_proc = 20; // Change to 0 to Start in Simple Clock Mode
 #else
   int current_proc = 1; // Start in Main Menu mode if no RTC
 #endif
@@ -806,7 +806,7 @@ void sendAllCodes() {
         cursor++;
         cursor = cursor % 24 ;
         number_drawmenu(24);
-        delay(100);
+        delay(250);
       }
     }
     int hour = cursor;
@@ -821,10 +821,69 @@ void sendAllCodes() {
         cursor++;
         cursor = cursor % 60 ;
         number_drawmenu(60);
-        delay(100);
+        delay(250);
       }
     }
     int minute = cursor;
+
+    // set day for clock date
+    DISP.fillScreen(BGCOLOR);
+    DISP.setCursor(0, 5, 1);
+    DISP.println("SET DAY");
+    delay(2000);
+    cursor = M5.Rtc.Day;
+    number_drawmenu(32);
+    while(digitalRead(M5_BUTTON_HOME) == HIGH) {
+      if (check_next_press()) {
+        cursor++;
+        cursor = cursor % 32 ;
+        number_drawmenu(32);
+        delay(100);
+      }
+    }
+    int day = cursor;
+
+    // set month for clock date
+    DISP.fillScreen(BGCOLOR);
+    DISP.setCursor(0, 5, 1);
+    DISP.println("SET MONTH");
+    delay(2000);
+    cursor = M5.Rtc.Month;
+    number_drawmenu(13);
+    while(digitalRead(M5_BUTTON_HOME) == HIGH) {
+      if (check_next_press()) {
+        cursor++;
+        cursor = cursor % 13 ;
+        number_drawmenu(13);
+        delay(100);
+      }
+    }
+    int month = cursor;
+
+    // set year for clock date
+    DISP.fillScreen(BGCOLOR);
+    DISP.setCursor(0, 5, 1);
+    DISP.println("2024");
+    delay(2000);
+    int year = 2024;
+
+    // set weekday for clock date
+    DISP.fillScreen(BGCOLOR);
+    DISP.setCursor(0, 5, 1);
+    DISP.println("SET WEEKDAY");
+    delay(2000);
+    cursor = M5.Rtc.Month;
+    number_drawmenu(6);
+    while(digitalRead(M5_BUTTON_HOME) == HIGH) {
+      if (check_next_press()) {
+        cursor++;
+        cursor = cursor % 7 ;
+        number_drawmenu(7);
+        delay(100);
+      }
+    }
+    int week = cursor;
+    
     DISP.fillScreen(BGCOLOR);
     DISP.setCursor(0, 5, 1);
     RTC_TimeTypeDef TimeStruct;
@@ -833,10 +892,18 @@ void sendAllCodes() {
     TimeStruct.Seconds = 0;
     M5.Rtc.SetTime(&TimeStruct);
     DISP.printf("Setting Time:\n%02d:%02d:00",hour,minute);
+    RTC_DateTypeDef DateStruct;
+    DateStruct.WeekDay = week;
+    DateStruct.Month = month;
+    DateStruct.Date = day;
+    DateStruct.Year = year;
+    M5.Rtc.SetData(&DateStruct);
+    DISP.printf("\n\nSetting Date:\n%02d/%02d/%04d",day,month,year);
+    //DISP.printf("%s",week);
     delay(2000);
     rstOverride = false;
     isSwitching = true;
-    current_proc = 0;
+    current_proc = 20;
   }
 #endif // RTC
 
@@ -1249,16 +1316,20 @@ void new_clock_setup() {
 
 // Get RTC Time
   M5.Rtc.GetBm8563Time();
-
+// Get RTC Date
 
 // New Clock Date - Set it manually
   RTC_DateTypeDef DateStruct;
-  DateStruct.WeekDay = 3;
-  DateStruct.Month = 01;
-  DateStruct.Date = 03;
-  DateStruct.Year = 2024;
-  M5.Rtc.SetData(&DateStruct); //.....set your date here, uncomment
+  M5.Rtc.GetData(&RTC_DateStruct);
+  if (DateStruct.Year == 1900) {
+    DateStruct.WeekDay = 4;
+    DateStruct.Month = 01;
+    DateStruct.Date = 04;
+    DateStruct.Year = 2024;
+    M5.Rtc.SetData(&DateStruct); //.....set your date here, uncomment
+  }
 }
+
 
 int H=0;
 int M=0;
@@ -1358,7 +1429,7 @@ void credits_setup(){
   DISP.setTextColor(BLACK, WHITE);
   DISP.setTextSize(MEDIUM_TEXT);
   DISP.setCursor(0, 25);
-  DISP.print(" M5-NEMO-ZT\n");
+  DISP.print("M5-NEMO-ZT_a2\n");
   DISP.setTextSize(SMALL_TEXT);
   DISP.printf("  %s\n",buildver);
   DISP.println(" For M5Stack");
